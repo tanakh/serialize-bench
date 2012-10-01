@@ -22,23 +22,13 @@ import           System.Random
 
 instance (Eq key, Hashable key, Binary key, Binary val)
          => Binary (HMS.HashMap key val) where
-  put hm = do
-    Binary.put $ HMS.size hm
-    mapM_ Binary.put $ HMS.toList hm
-    -- HMS.foldlWithKey' (\m k v -> m >> Binary.put k >> Binary.put v) (return ()) hm
-
-  get = do
-    len <- Binary.get
-    HMS.fromList <$> replicateM len Binary.get
+  put = Binary.put . HMS.toList
+  get = HMS.fromList <$> Binary.get
 
 instance (Eq key, Hashable key, Cereal.Serialize key, Cereal.Serialize val)
          => Cereal.Serialize (HMS.HashMap key val) where
-  put hm = do
-    Cereal.put $ HMS.size hm
-    mapM_ Cereal.put $ HMS.toList hm
-  get = do
-    len <- Cereal.get
-    HMS.fromList <$> replicateM len Cereal.get
+  put = Cereal.put . HMS.toList
+  get = HMS.fromList <$> Cereal.get
 
 fromHMS :: MapType -> Builder
 fromHMS hm =
